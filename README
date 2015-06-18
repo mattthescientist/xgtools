@@ -1,0 +1,30 @@
+================================================================================
+Tools for manipulating FTS and XGremlin data (Xgtools) - version 1.0
+Source code archive
+================================================================================
+
+Xgtools is a collection of tools for manipulating FTS and XGremlin line lists
+and data files and is released under the GNU General Public License version 3. 
+Please read COPYING for details. The package includes several programs:
+
+extractlevel : Extracts lines from a Kurucz gf*.lines file based on the energy
+               of a target upper or lower level.
+ftscalibrate : Calibrates the wavenumbers of lines saved in an XGremlin ASCII 
+               (writelines) line list.
+ftscombine   : Combines several spectral .dat files using + - x or / operators
+ftsintensity : Calibrates the intensity of an FTS line spectrum.
+ftsresponse  : Calculates a spectrometer response function.
+generatesyn  : Generates an XGremlin SYN file from a Kurucz line list.
+xgcatlin     : Concatenates several XGremlin line list (.LIN) files.
+xgfit        : Automates line fitting in XGremlin with lsqfit.
+xgsave       : Converts XGremlin scratch spectra into externally readable files.
+
+Many of these programs require the GNU Scientific Library (GSL), so make sure
+that the development files for GSL have been installed before compiling Xgtools.
+To compile Xgtools, just use the standard commands:
+
+./configure
+make
+sudo make install
+
+

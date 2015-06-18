@@ -1,0 +1,84 @@
+# Makefile
+
+CC = @CXX@
+SRC_DIR := src
+BIN_DIR := @prefix@/bin
+XGTOOLS_DIR := @prefix@/xgtools
+
+# Low-level classes to be compiled to object files and used in different programs
+_OBJ_COM := kzline.o line.o listcal.o xgline.o
+OBJ_COM := $(patsubst %,$(SRC_DIR)/%,$(_OBJ_COM))
+
+# Compiler flags. C_FLAGS is the default, GSL_FLAGS includes flags needed for
+# the GSL library
+C_FLAGS := 
+GSL_FLAGS := $(C_FLAGS) -lgsl -lgslcblas
+
+# General object dependencies
+%.o: %.cpp %.h
+	$(CC) -c -o $@ $< $(C_FLAGS)
+
+# Rules for building the Xgtools binaries
+.PHONY: all install clean ftscalibrate ftscombine ftsintensity ftsresponse \
+  xgcatlin xgfit xgsave generatesyn generatesyn_writelines extractlevel
+
+all: ftscalibrate ftscombine ftsintensity ftsresponse xgcatlin xgfit xgsave \
+  generatesyn generatesyn_writelines extractlevel
+
+ftscalibrate: $(SRC_DIR)/line.o $(SRC_DIR)/listcal.o $(SRC_DIR)/ftscalibrate.cpp
+	$(CC) $(SRC_DIR)/ftscalibrate.cpp $(SRC_DIR)/line.o $(SRC_DIR)/listcal.o -o ftscalibrate $(GSL_FLAGS)
+
+ftsintensity: $(SRC_DIR)/ftsintensity.cpp
+	$(CC) $(SRC_DIR)/ftsintensity.cpp -o ftsintensity $(GSL_FLAGS)
+
+ftsresponse: $(SRC_DIR)/ftsresponse.cpp
+	$(CC) $(SRC_DIR)/ftsresponse.cpp -o ftsresponse $(GSL_FLAGS)
+
+xgcatlin: $(SRC_DIR)/xgcatlin.cpp
+	$(CC) $(SRC_DIR)/xgcatlin.cpp -o xgcatlin $(C_FLAGS)
+
+xgfit: $(SRC_DIR)/xgline.o $(SRC_DIR)/xgfit.cpp
+	$(CC) $(SRC_DIR)/xgfit.cpp $(SRC_DIR)/xgline.o -o xgfit $(C_FLAGS)
+
+xgsave: $(SRC_DIR)/xgsave.cpp
+	$(CC) $(SRC_DIR)/xgsave.cpp -o xgsave $(C_FLAGS)
+
+generatesyn: $(SRC_DIR)/kzline.o $(SRC_DIR)/xgline.o $(SRC_DIR)/generatesyn.cpp
+	$(CC) $(SRC_DIR)/generatesyn.cpp $(SRC_DIR)/kzline.o $(SRC_DIR)/xgline.o -o generatesyn $(C_FLAGS)
+
+generatesyn_writelines: $(SRC_DIR)/xgline.o $(SRC_DIR)/generatesyn_writelines.cpp
+	$(CC) $(SRC_DIR)/generatesyn_writelines.cpp $(SRC_DIR)/xgline.o -o generatesyn_writelines $(C_FLAGS)
+
+extractlevel: $(SRC_DIR)/extractlevel.cpp
+	$(CC) $(SRC_DIR)/extractlevel.cpp -o extractlevel $(C_FLAGS)
+
+# Rule for installing Xgtools
+install:
+	@echo "Installing Xgtools ..."
+	@if [ ! -d @prefix@ ]; then mkdir -m 755 @prefix@ ; fi
+	@echo "  copying binaries to $(BIN_DIR)"
+	@if [ ! -d $(BIN_DIR) ]; then mkdir -m 755 $(BIN_DIR) ; fi
+	@install -m 755 ftscalibrate ftscombine ftsintensity ftsresponse generatesyn \
+    generatesyn_writelines xgcatlin xgfit xgsave extractlevel $(BIN_DIR)
+	@echo "done"
+
+# Rule for cleaning Xgtools
+clean:
+	@echo "Removing object files from the source directory"
+	@rm -f $(OBJ_COM)
+
+# Rules for building low-level classes that are imported into the individual
+# programs within Xgtools
+$(SRC_DIR)/kzline.o: $(SRC_DIR)/kzline.cpp $(SRC_DIR)/kzline.h $(SRC_DIR)/ErrDefs.h
+	$(CC) -c -o $@ $< $(C_FLAGS)
+
+$(SRC_DIR)/xgline.o: $(SRC_DIR)/xgline.cpp $(SRC_DIR)/xgline.h $(SRC_DIR)/ErrDefs.h
+	$(CC) -c -o $@ $< $(C_FLAGS)
+  
+$(SRC_DIR)/line.o: $(SRC_DIR)/line.cpp $(SRC_DIR)/line.h $(SRC_DIR)/ErrDefs.h
+	$(CC) -c -o $@ $< $(C_FLAGS)               
+
+$(SRC_DIR)/listcal.o: $(SRC_DIR)/listcal.cpp $(SRC_DIR)/listcal.h \
+  $(SRC_DIR)/ErrDefs.h $(SRC_DIR)/line.cpp $(SRC_DIR)/line.h $(SRC_DIR)/lineio.cpp
+	$(CC) -c -o $@ $< $(C_FLAGS) -lgsl -lgslcblas 
+
