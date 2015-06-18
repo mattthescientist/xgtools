@@ -27,6 +27,9 @@ all: ftscalibrate ftscombine ftsintensity ftsresponse xgcatlin xgfit xgsave \
 
 ftscalibrate: $(SRC_DIR)/line.o $(SRC_DIR)/listcal.o $(SRC_DIR)/ftscalibrate.cpp
 	$(CC) $(SRC_DIR)/ftscalibrate.cpp $(SRC_DIR)/line.o $(SRC_DIR)/listcal.o -o ftscalibrate $(GSL_FLAGS)
+	
+ftscombine: $(SRC_DIR)/ftscombine.cpp
+	$(CC) $(SRC_DIR)/ftscombine.cpp -o ftscombine $(C_FLAGS)
 
 ftsintensity: $(SRC_DIR)/ftsintensity.cpp
 	$(CC) $(SRC_DIR)/ftsintensity.cpp -o ftsintensity $(GSL_FLAGS)
